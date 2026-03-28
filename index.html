@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Surface Data Extractor (Required Groups Only)</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  margin:0;
+  padding:0;
+  background: linear-gradient(135deg, #f0f9ff, #fef3c7);
+}
+
+.container{
+  max-width: 1000px;
+  margin: 30px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h2{
+  text-align:center;
+  margin-top:0;
+  color:#1f2937;
+}
+
+a.top-link {
+  display:inline-block;
+  margin-bottom:15px;
+  padding:8px 14px;
+  background:#3b82f6;
+  color:#fff;
+  text-decoration:none;
+  border-radius:6px;
+}
+a.top-link:hover {
+  background:#2563eb;
+}
+
+.options{
+  margin-bottom:15px;
+  padding:12px;
+  background:#f9fafb;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+}
+.options label{
+  display:inline-block;
+  margin-right:20px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+textarea{
+  width:100%;
+  height:200px;
+  margin-top:10px;
+  padding:10px;
+  font-family: monospace;
+  font-size:14px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  background:#fdfdfd;
+}
+textarea:focus{
+  outline:none;
+  border-color:#60a5fa;
+  box-shadow:0 0 0 2px rgba(96,165,250,0.3);
+}
+
+button{
+  margin-top:12px;
+  margin-right:10px;
+  padding:8px 16px;
+  border:none;
+  border-radius:8px;
+  background:#3b82f6;
+  color:white;
+  font-size:14px;
+  cursor:pointer;
+  transition: all 0.2s ease;
+}
+button:hover{
+  background:#2563eb;
+  transform: translateY(-1px);
+}
+button:active{
+  transform: translateY(0);
+}
+
+#stationCount{
+  margin-top:15px;
+  font-weight:bold;
+  color:#065f46;
+  background:#ecfdf5;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #a7f3d0;
+}
+
+#output{
+  margin-top:12px;
+  white-space:pre;
+  font-family:'Courier New', monospace;
+  font-size:13px;
+  line-height:1.2;
+  background:#f9fafb;
+  color:#111827;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  overflow:auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="https://pmdnmcc.net/websites/RealTimeData.aspx" target="_blank" class="top-link">
+   Real‑Time Data (PMD NMCC)
+</a>
+
+<h2>Surface Data Extractor (Required Groups Only)</h2>
+
+<div class="options">
+  <label><input type="checkbox" id="filteredModeChk"> Produce FILTERED Stations Only</label>
+  <label><input type="checkbox" id="includeHillyChk"> Include Hilly Area</label>
+  <label><input type="checkbox" id="lineNumberChk"> Include Line Number</label>
+  <label><input type="checkbox" id="notRequiredChk"> Include NOT REQUIRED Stations</label>
+</div>
+
+<textarea id="dataInput" placeholder="Paste your data here"></textarea>
+
+<br>
+<button id="submitBtn">Submit</button>
+<button id="downloadBtn">Download TXT</button>
+
+<div id="stationCount"></div>
+<div id="output"></div>
+
+</div>
+
+<script>
+(function(){
+
+const REQUIRED_STATIONS = new Set([
+"41572","41571","41600","41640","41620","41624","41675","41678","41697",
+"41700","41710","41715","41718","41725","41742","41746","41749","41756",
+"41759","41764","41768","41780","41785","15020","15280","15480","15730",
+"16650","16749","16754","17022","17026","17034","17038","17060","17084",
+"17124","17128","17184","17202","17210","17240","17270","17330","33317",
+"33415","33466","33506","33587","33761","33791","33837","33946","34336",
+"34344","34398","34504","34535","34545","34560","34579","34698","34712",
+"34824","34858","34880","35217","35344","35358","35361","35394","35416",
+"35542","35671","35699","35700","35715","35739","35746","35925","35927",
+"35953","35969","36394","36428","36403","36639","36729","36821","36859",
+"36911","37001","37018","37054","37085","37228","37472","38001","38149",
+"38178","38196","38203","38232","38341","38388","38392","38396","38403",
+"38457","38507","38565","38579","38647","38656","38687","38750","38799",
+"38806","38812","38836","38880","38886","38927","38987","40030","40045",
+"40170","40180","40357","40360","40361","40362","40373","40375","40394",
+"40400","40405","40417","40420","40430","40439","40582","40703","40718",
+"40727","40743","40754","40762","40766","40785","40791","40809","40811",
+"40821","40841","40854","40856","40859","40875","40879","40882","40893",
+"41024","41061","41136","41140","41180","41196","41216","41244","41256",
+"41268","41288","41315","41316","42101","42111","42165","42182","42314",
+"42339","42348","42361","42369","42379","42410","42452","42492","42559",
+"42571","42591","42634","42647","42667","42671","42701","42724","42754",
+"42779","42809","42840","42867","42971","43003","43014","43041","43086",
+"43110","43117","43128","43150","43185","43201","43213","43279","43284",
+"43295","43311","43329","43333","43344","43353","43369","43371","43413",
+"43450","43467","44424","44449","44461","48010","48025","48045","48062",
+"48094","51076","51243","51379","51656","51709","51765","51777","51818",
+"51828","52203","52418","52818","55299","55472","55591","55696","56004",
+"56018","56312","62306","62332","62337","62387","62405","62414","62459",
+"62465","63333"
+]);
+
+let processedText = '';
+
+function getStationType(groups){
+  for(let i=3;i<groups.length;i++){
+    if(groups[i].startsWith('4')){
+      let p = parseInt(groups[i],10);
+      return (p>=41000 && p<=49950) ? "HILLY" : "PLAIN";
+    }
+  }
+  return "PLAIN";
+}
+
+function processData(){
+  let input = dataInput.value.trim();
+  if(!input){ alert("Paste your data first!"); return; }
+
+  let filtered = filteredModeChk.checked;
+  let includeHilly = includeHillyChk.checked;
+
+  let collected=[], seen=new Set(), notReq=new Set();
+
+  input.split('\n').forEach(line=>{
+    line=line.trim();
+    if(!line || line.startsWith('Data')||line.startsWith('_')) return;
+
+    let p=line.split(/\s+/);
+    if(!/^\d{5}$/.test(p[0])) return;
+
+    let st=p[0];
+    if(filtered && !REQUIRED_STATIONS.has(st)){ notReq.add(st); return; }
+    if(seen.has(st)) return;
+
+    let cut=p.findIndex(v=>v==='333'||v==='555');
+    let sel=cut>=0?p.slice(0,cut):p;
+
+    if(getStationType(sel)==="HILLY" && !includeHilly) return;
+
+    seen.add(st);
+    let out=[];
+    sel.forEach((v,i)=>{
+      if(i<3 || (v[0]!=='3' && v[0]!=='5')) out.push(v);
+    });
+
+    collected.push({station:+st,line:out.join(' ')});
+  });
+
+  collected.sort((a,b)=>a.station-b.station);
+
+  processedText = collected.map((o,i)=>
+    lineNumberChk.checked?(i+1)+" "+o.line:o.line
+  ).join('\n')+"\n";
+
+  stationCount.textContent="Stations Produced: "+collected.length;
+  output.textContent=processedText;
+}
+
+// ✅ Auto‑copy tied directly to button click
+submitBtn.onclick = () => {
+  processData();
+  if(processedText){
+    navigator.clipboard.writeText(processedText);
+  }
+};
+
+downloadBtn.onclick=()=>{
+  if(!processedText)return alert("No data processed yet!");
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([processedText]));
+  a.download="processed_surface_data_sorted.txt";
+  a.click();
+};
+
+})();
+</script>
+
+</body>
+</html>
