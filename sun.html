@@ -1,0 +1,581 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sun Timing Box</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f9;
+  padding: 20px;
+}
+
+.box {
+  width: 340px;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h3 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nav button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.toggle-btn {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #28a745;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 6px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.hidden {
+  display: none;
+}
+
+.today {
+  background-color: #ffeeba;
+  font-weight: bold;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+  <h3>Sun Timings KARACHI</h3>
+
+  <div class="nav">
+    <button onclick="prevDays()">◀</button>
+    <button onclick="nextDays()">▶</button>
+  </div>
+
+  <button class="toggle-btn" onclick="toggleView()">
+    Show Full Details
+  </button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th class="bctl hidden">BCTL</th>
+        <th>Sunrise</th>
+        <th>Sunset</th>
+        <th class="ectl hidden">ECTL</th>
+      </tr>
+    </thead>
+    <tbody id="dataBody"></tbody>
+  </table>
+</div>
+
+<script>
+
+// 🔹 PASTE YOUR EXCEL DATA HERE
+const timeData = [
+{date:"01-Jan",bctl:"6:51",sunrise:"7:16",sunset:"17:55",ectl:"18:20"},
+{date:"02-Jan",bctl:"6:51",sunrise:"7:16",sunset:"17:55",ectl:"18:20"},
+{date:"03-Jan",bctl:"6:51",sunrise:"7:16",sunset:"17:56",ectl:"18:21"},
+{date:"04-Jan",bctl:"6:52",sunrise:"7:16",sunset:"17:57",ectl:"18:22"},
+{date:"05-Jan",bctl:"6:52",sunrise:"7:17",sunset:"17:57",ectl:"18:22"},
+{date:"06-Jan",bctl:"6:52",sunrise:"7:17",sunset:"17:58",ectl:"18:23"},
+{date:"07-Jan",bctl:"6:52",sunrise:"7:17",sunset:"17:59",ectl:"18:24"},
+{date:"08-Jan",bctl:"6:52",sunrise:"7:17",sunset:"18:00",ectl:"18:24"},
+{date:"09-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:00",ectl:"18:25"},
+{date:"10-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:01",ectl:"18:26"},
+{date:"11-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:02",ectl:"18:26"},
+{date:"12-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:03",ectl:"18:27"},
+{date:"13-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:03",ectl:"18:28"},
+{date:"14-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:04",ectl:"18:29"},
+{date:"15-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:05",ectl:"18:29"},
+{date:"16-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:05",ectl:"18:30"},
+{date:"17-Jan",bctl:"6:53",sunrise:"7:18",sunset:"18:06",ectl:"18:31"},
+{date:"18-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:07",ectl:"18:31"},
+{date:"19-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:08",ectl:"18:32"},
+{date:"20-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:08",ectl:"18:33"},
+{date:"21-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:09",ectl:"18:34"},
+{date:"22-Jan",bctl:"6:53",sunrise:"7:17",sunset:"18:10",ectl:"18:34"},
+{date:"23-Jan",bctl:"6:52",sunrise:"7:17",sunset:"18:11",ectl:"18:35"},
+{date:"24-Jan",bctl:"6:52",sunrise:"7:16",sunset:"18:11",ectl:"18:36"},
+{date:"25-Jan",bctl:"6:52",sunrise:"7:16",sunset:"18:12",ectl:"18:36"},
+{date:"26-Jan",bctl:"6:52",sunrise:"7:16",sunset:"18:13",ectl:"18:37"},
+{date:"27-Jan",bctl:"6:51",sunrise:"7:16",sunset:"18:14",ectl:"18:38"},
+{date:"28-Jan",bctl:"6:51",sunrise:"7:15",sunset:"18:14",ectl:"18:38"},
+{date:"29-Jan",bctl:"6:51",sunrise:"7:15",sunset:"18:15",ectl:"18:39"},
+{date:"30-Jan",bctl:"6:51",sunrise:"7:14",sunset:"18:16",ectl:"18:40"},
+{date:"31-Jan",bctl:"6:50",sunrise:"7:14",sunset:"18:17",ectl:"18:40"},
+{date:"01-Feb",bctl:"6:50",sunrise:"7:14",sunset:"18:17",ectl:"18:41"},
+{date:"02-Feb",bctl:"6:49",sunrise:"7:13",sunset:"18:18",ectl:"18:42"},
+{date:"03-Feb",bctl:"6:49",sunrise:"7:13",sunset:"18:19",ectl:"18:42"},
+{date:"04-Feb",bctl:"6:49",sunrise:"7:12",sunset:"18:19",ectl:"18:43"},
+{date:"05-Feb",bctl:"6:48",sunrise:"7:12",sunset:"18:20",ectl:"18:44"},
+{date:"06-Feb",bctl:"6:48",sunrise:"7:11",sunset:"18:21",ectl:"18:44"},
+{date:"07-Feb",bctl:"6:47",sunrise:"7:11",sunset:"18:21",ectl:"18:45"},
+{date:"08-Feb",bctl:"6:47",sunrise:"7:10",sunset:"18:22",ectl:"18:46"},
+{date:"09-Feb",bctl:"6:46",sunrise:"7:10",sunset:"18:23",ectl:"18:46"},
+{date:"10-Feb",bctl:"6:45",sunrise:"7:09",sunset:"18:23",ectl:"18:47"},
+{date:"11-Feb",bctl:"6:45",sunrise:"7:08",sunset:"18:24",ectl:"18:48"},
+{date:"12-Feb",bctl:"6:44",sunrise:"7:08",sunset:"18:25",ectl:"18:48"},
+{date:"13-Feb",bctl:"6:44",sunrise:"7:07",sunset:"18:25",ectl:"18:49"},
+{date:"14-Feb",bctl:"6:43",sunrise:"7:06",sunset:"18:26",ectl:"18:49"},
+{date:"15-Feb",bctl:"6:42",sunrise:"7:06",sunset:"18:27",ectl:"18:50"},
+{date:"16-Feb",bctl:"6:42",sunrise:"7:05",sunset:"18:27",ectl:"18:50"},
+{date:"17-Feb",bctl:"6:41",sunrise:"7:04",sunset:"18:28",ectl:"18:51"},
+{date:"18-Feb",bctl:"6:40",sunrise:"7:03",sunset:"18:28",ectl:"18:52"},
+{date:"19-Feb",bctl:"6:39",sunrise:"7:03",sunset:"18:29",ectl:"18:52"},
+{date:"20-Feb",bctl:"6:39",sunrise:"7:02",sunset:"18:30",ectl:"18:53"},
+{date:"21-Feb",bctl:"6:38",sunrise:"7:01",sunset:"18:30",ectl:"18:53"},
+{date:"22-Feb",bctl:"6:37",sunrise:"7:00",sunset:"18:31",ectl:"18:54"},
+{date:"23-Feb",bctl:"6:36",sunrise:"6:59",sunset:"18:31",ectl:"18:54"},
+{date:"24-Feb",bctl:"6:36",sunrise:"6:59",sunset:"18:32",ectl:"18:55"},
+{date:"25-Feb",bctl:"6:35",sunrise:"6:58",sunset:"18:32",ectl:"18:55"},
+{date:"26-Feb",bctl:"6:34",sunrise:"6:57",sunset:"18:33",ectl:"18:56"},
+{date:"27-Feb",bctl:"6:33",sunrise:"6:56",sunset:"18:33",ectl:"18:56"},
+{date:"28-Feb",bctl:"6:32",sunrise:"6:55",sunset:"18:34",ectl:"18:57"},
+{date:"01-Mar",bctl:"6:31",sunrise:"6:54",sunset:"18:35",ectl:"18:57"},
+{date:"02-Mar",bctl:"6:30",sunrise:"6:53",sunset:"18:35",ectl:"18:58"},
+{date:"03-Mar",bctl:"6:29",sunrise:"6:52",sunset:"18:36",ectl:"18:58"},
+{date:"04-Mar",bctl:"6:29",sunrise:"6:51",sunset:"18:36",ectl:"18:59"},
+{date:"05-Mar",bctl:"6:28",sunrise:"6:51",sunset:"18:37",ectl:"18:59"},
+{date:"06-Mar",bctl:"6:27",sunrise:"6:50",sunset:"18:37",ectl:"19:00"},
+{date:"07-Mar",bctl:"6:26",sunrise:"6:49",sunset:"18:38",ectl:"19:00"},
+{date:"08-Mar",bctl:"6:25",sunrise:"6:48",sunset:"18:38",ectl:"19:01"},
+{date:"09-Mar",bctl:"6:24",sunrise:"6:47",sunset:"18:38",ectl:"19:01"},
+{date:"10-Mar",bctl:"6:23",sunrise:"6:46",sunset:"18:39",ectl:"19:02"},
+{date:"11-Mar",bctl:"6:22",sunrise:"6:45",sunset:"18:39",ectl:"19:02"},
+{date:"12-Mar",bctl:"6:21",sunrise:"6:44",sunset:"18:40",ectl:"19:03"},
+{date:"13-Mar",bctl:"6:20",sunrise:"6:43",sunset:"18:40",ectl:"19:03"},
+{date:"14-Mar",bctl:"6:19",sunrise:"6:42",sunset:"18:41",ectl:"19:04"},
+{date:"15-Mar",bctl:"6:18",sunrise:"6:41",sunset:"18:41",ectl:"19:04"},
+{date:"16-Mar",bctl:"6:17",sunrise:"6:40",sunset:"18:42",ectl:"19:04"},
+{date:"17-Mar",bctl:"6:16",sunrise:"6:39",sunset:"18:42",ectl:"19:05"},
+{date:"18-Mar",bctl:"6:15",sunrise:"6:38",sunset:"18:43",ectl:"19:05"},
+{date:"19-Mar",bctl:"6:14",sunrise:"6:37",sunset:"18:43",ectl:"19:06"},
+{date:"20-Mar",bctl:"6:13",sunrise:"6:36",sunset:"18:43",ectl:"19:06"},
+{date:"21-Mar",bctl:"6:12",sunrise:"6:35",sunset:"18:44",ectl:"19:07"},
+{date:"22-Mar",bctl:"6:11",sunrise:"6:34",sunset:"18:44",ectl:"19:07"},
+{date:"23-Mar",bctl:"6:10",sunrise:"6:33",sunset:"18:45",ectl:"19:08"},
+{date:"24-Mar",bctl:"6:09",sunrise:"6:32",sunset:"18:45",ectl:"19:08"},
+{date:"25-Mar",bctl:"6:08",sunrise:"6:30",sunset:"18:46",ectl:"19:08"},
+{date:"26-Mar",bctl:"6:07",sunrise:"6:29",sunset:"18:46",ectl:"19:09"},
+{date:"27-Mar",bctl:"6:06",sunrise:"6:28",sunset:"18:46",ectl:"19:09"},
+{date:"28-Mar",bctl:"6:05",sunrise:"6:27",sunset:"18:47",ectl:"19:10"},
+{date:"29-Mar",bctl:"6:03",sunrise:"6:26",sunset:"18:47",ectl:"19:10"},
+{date:"30-Mar",bctl:"6:02",sunrise:"6:25",sunset:"18:48",ectl:"19:11"},
+{date:"31-Mar",bctl:"6:01",sunrise:"6:24",sunset:"18:48",ectl:"19:11"},
+{date:"01-Apr",bctl:"6:00",sunrise:"6:23",sunset:"18:49",ectl:"19:12"},
+{date:"02-Apr",bctl:"5:59",sunrise:"6:22",sunset:"18:49",ectl:"19:12"},
+{date:"03-Apr",bctl:"5:58",sunrise:"6:21",sunset:"18:49",ectl:"19:12"},
+{date:"04-Apr",bctl:"5:57",sunrise:"6:20",sunset:"18:50",ectl:"19:13"},
+{date:"05-Apr",bctl:"5:56",sunrise:"6:19",sunset:"18:50",ectl:"19:13"},
+{date:"06-Apr",bctl:"5:55",sunrise:"6:18",sunset:"18:51",ectl:"19:14"},
+{date:"07-Apr",bctl:"5:54",sunrise:"6:17",sunset:"18:51",ectl:"19:14"},
+{date:"08-Apr",bctl:"5:53",sunrise:"6:16",sunset:"18:52",ectl:"19:15"},
+{date:"09-Apr",bctl:"5:52",sunrise:"6:15",sunset:"18:52",ectl:"19:15"},
+{date:"10-Apr",bctl:"5:51",sunrise:"6:14",sunset:"18:52",ectl:"19:16"},
+{date:"11-Apr",bctl:"5:50",sunrise:"6:13",sunset:"18:53",ectl:"19:16"},
+{date:"12-Apr",bctl:"5:49",sunrise:"6:12",sunset:"18:53",ectl:"19:17"},
+{date:"13-Apr",bctl:"5:48",sunrise:"6:11",sunset:"18:54",ectl:"19:17"},
+{date:"14-Apr",bctl:"5:47",sunrise:"6:10",sunset:"18:54",ectl:"19:17"},
+{date:"15-Apr",bctl:"5:46",sunrise:"6:09",sunset:"18:55",ectl:"19:18"},
+{date:"16-Apr",bctl:"5:45",sunrise:"6:09",sunset:"18:55",ectl:"19:18"},
+{date:"17-Apr",bctl:"5:44",sunrise:"6:08",sunset:"18:56",ectl:"19:19"},
+{date:"18-Apr",bctl:"5:43",sunrise:"6:07",sunset:"18:56",ectl:"19:19"},
+{date:"19-Apr",bctl:"5:42",sunrise:"6:06",sunset:"18:56",ectl:"19:20"},
+{date:"20-Apr",bctl:"5:41",sunrise:"6:05",sunset:"18:57",ectl:"19:20"},
+{date:"21-Apr",bctl:"5:40",sunrise:"6:04",sunset:"18:57",ectl:"19:21"},
+{date:"22-Apr",bctl:"5:40",sunrise:"6:03",sunset:"18:58",ectl:"19:21"},
+{date:"23-Apr",bctl:"5:39",sunrise:"6:02",sunset:"18:58",ectl:"19:22"},
+{date:"24-Apr",bctl:"5:38",sunrise:"6:01",sunset:"18:59",ectl:"19:22"},
+{date:"25-Apr",bctl:"5:37",sunrise:"6:01",sunset:"18:59",ectl:"19:23"},
+{date:"26-Apr",bctl:"5:36",sunrise:"6:00",sunset:"19:00",ectl:"19:23"},
+{date:"27-Apr",bctl:"5:35",sunrise:"5:59",sunset:"19:00",ectl:"19:24"},
+{date:"28-Apr",bctl:"5:34",sunrise:"5:58",sunset:"19:01",ectl:"19:25"},
+{date:"29-Apr",bctl:"5:34",sunrise:"5:57",sunset:"19:01",ectl:"19:25"},
+{date:"30-Apr",bctl:"5:33",sunrise:"5:57",sunset:"19:02",ectl:"19:26"},
+{date:"01-May",bctl:"5:32",sunrise:"5:56",sunset:"19:02",ectl:"19:26"},
+{date:"02-May",bctl:"5:31",sunrise:"5:55",sunset:"19:03",ectl:"19:27"},
+{date:"03-May",bctl:"5:30",sunrise:"5:54",sunset:"19:03",ectl:"19:27"},
+{date:"04-May",bctl:"5:30",sunrise:"5:54",sunset:"19:04",ectl:"19:28"},
+{date:"05-May",bctl:"5:29",sunrise:"5:53",sunset:"19:04",ectl:"19:28"},
+{date:"06-May",bctl:"5:28",sunrise:"5:52",sunset:"19:05",ectl:"19:29"},
+{date:"07-May",bctl:"5:27",sunrise:"5:52",sunset:"19:05",ectl:"19:29"},
+{date:"08-May",bctl:"5:27",sunrise:"5:51",sunset:"19:06",ectl:"19:30"},
+{date:"09-May",bctl:"5:26",sunrise:"5:50",sunset:"19:06",ectl:"19:31"},
+{date:"10-May",bctl:"5:25",sunrise:"5:50",sunset:"19:07",ectl:"19:31"},
+{date:"11-May",bctl:"5:25",sunrise:"5:49",sunset:"19:07",ectl:"19:32"},
+{date:"12-May",bctl:"5:24",sunrise:"5:49",sunset:"19:08",ectl:"19:32"},
+{date:"13-May",bctl:"5:24",sunrise:"5:48",sunset:"19:08",ectl:"19:33"},
+{date:"14-May",bctl:"5:23",sunrise:"5:48",sunset:"19:09",ectl:"19:33"},
+{date:"15-May",bctl:"5:22",sunrise:"5:47",sunset:"19:09",ectl:"19:34"},
+{date:"16-May",bctl:"5:22",sunrise:"5:47",sunset:"19:10",ectl:"19:34"},
+{date:"17-May",bctl:"5:21",sunrise:"5:46",sunset:"19:10",ectl:"19:35"},
+{date:"18-May",bctl:"5:21",sunrise:"5:46",sunset:"19:11",ectl:"19:36"},
+{date:"19-May",bctl:"5:20",sunrise:"5:45",sunset:"19:11",ectl:"19:36"},
+{date:"20-May",bctl:"5:20",sunrise:"5:45",sunset:"19:12",ectl:"19:37"},
+{date:"21-May",bctl:"5:20",sunrise:"5:44",sunset:"19:12",ectl:"19:37"},
+{date:"22-May",bctl:"5:19",sunrise:"5:44",sunset:"19:13",ectl:"19:38"},
+{date:"23-May",bctl:"5:19",sunrise:"5:44",sunset:"19:13",ectl:"19:38"},
+{date:"24-May",bctl:"5:18",sunrise:"5:43",sunset:"19:14",ectl:"19:39"},
+{date:"25-May",bctl:"5:18",sunrise:"5:43",sunset:"19:14",ectl:"19:39"},
+{date:"26-May",bctl:"5:18",sunrise:"5:43",sunset:"19:15",ectl:"19:40"},
+{date:"27-May",bctl:"5:17",sunrise:"5:42",sunset:"19:15",ectl:"19:40"},
+{date:"28-May",bctl:"5:17",sunrise:"5:42",sunset:"19:16",ectl:"19:41"},
+{date:"29-May",bctl:"5:17",sunrise:"5:42",sunset:"19:16",ectl:"19:41"},
+{date:"30-May",bctl:"5:16",sunrise:"5:42",sunset:"19:17",ectl:"19:42"},
+{date:"31-May",bctl:"5:16",sunrise:"5:42",sunset:"19:17",ectl:"19:42"},
+{date:"01-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:18",ectl:"19:43"},
+{date:"02-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:18",ectl:"19:43"},
+{date:"03-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:18",ectl:"19:44"},
+{date:"04-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:19",ectl:"19:44"},
+{date:"05-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:19",ectl:"19:45"},
+{date:"06-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:20",ectl:"19:45"},
+{date:"07-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:20",ectl:"19:46"},
+{date:"08-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:21",ectl:"19:46"},
+{date:"09-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:21",ectl:"19:47"},
+{date:"10-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:21",ectl:"19:47"},
+{date:"11-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:22",ectl:"19:47"},
+{date:"12-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:22",ectl:"19:48"},
+{date:"13-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:22",ectl:"19:48"},
+{date:"14-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:23",ectl:"19:48"},
+{date:"15-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:23",ectl:"19:49"},
+{date:"16-Jun",bctl:"5:15",sunrise:"5:41",sunset:"19:23",ectl:"19:49"},
+{date:"17-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:24",ectl:"19:49"},
+{date:"18-Jun",bctl:"5:16",sunrise:"5:41",sunset:"19:24",ectl:"19:50"},
+{date:"19-Jun",bctl:"5:16",sunrise:"5:42",sunset:"19:24",ectl:"19:50"},
+{date:"20-Jun",bctl:"5:16",sunrise:"5:42",sunset:"19:24",ectl:"19:50"},
+{date:"21-Jun",bctl:"5:16",sunrise:"5:42",sunset:"19:25",ectl:"19:50"},
+{date:"22-Jun",bctl:"5:16",sunrise:"5:42",sunset:"19:25",ectl:"19:51"},
+{date:"23-Jun",bctl:"5:17",sunrise:"5:42",sunset:"19:25",ectl:"19:51"},
+{date:"24-Jun",bctl:"5:17",sunrise:"5:43",sunset:"19:25",ectl:"19:51"},
+{date:"25-Jun",bctl:"5:17",sunrise:"5:43",sunset:"19:25",ectl:"19:51"},
+{date:"26-Jun",bctl:"5:18",sunrise:"5:43",sunset:"19:25",ectl:"19:51"},
+{date:"27-Jun",bctl:"5:18",sunrise:"5:44",sunset:"19:26",ectl:"19:51"},
+{date:"28-Jun",bctl:"5:18",sunrise:"5:44",sunset:"19:26",ectl:"19:51"},
+{date:"29-Jun",bctl:"5:18",sunrise:"5:44",sunset:"19:26",ectl:"19:52"},
+{date:"30-Jun",bctl:"5:19",sunrise:"5:44",sunset:"19:26",ectl:"19:52"},
+{date:"01-Jul",bctl:"5:19",sunrise:"5:45",sunset:"19:26",ectl:"19:52"},
+{date:"02-Jul",bctl:"5:20",sunrise:"5:45",sunset:"19:26",ectl:"19:52"},
+{date:"03-Jul",bctl:"5:20",sunrise:"5:46",sunset:"19:26",ectl:"19:52"},
+{date:"04-Jul",bctl:"5:20",sunrise:"5:46",sunset:"19:26",ectl:"19:52"},
+{date:"05-Jul",bctl:"5:21",sunrise:"5:46",sunset:"19:26",ectl:"19:52"},
+{date:"06-Jul",bctl:"5:21",sunrise:"5:47",sunset:"19:26",ectl:"19:51"},
+{date:"07-Jul",bctl:"5:21",sunrise:"5:47",sunset:"19:26",ectl:"19:51"},
+{date:"08-Jul",bctl:"5:22",sunrise:"5:47",sunset:"19:26",ectl:"19:51"},
+{date:"09-Jul",bctl:"5:22",sunrise:"5:48",sunset:"19:26",ectl:"19:51"},
+{date:"10-Jul",bctl:"5:23",sunrise:"5:48",sunset:"19:25",ectl:"19:51"},
+{date:"11-Jul",bctl:"5:23",sunrise:"5:49",sunset:"19:25",ectl:"19:51"},
+{date:"12-Jul",bctl:"5:24",sunrise:"5:49",sunset:"19:25",ectl:"19:51"},
+{date:"13-Jul",bctl:"5:24",sunrise:"5:50",sunset:"19:25",ectl:"19:50"},
+{date:"14-Jul",bctl:"5:25",sunrise:"5:50",sunset:"19:25",ectl:"19:50"},
+{date:"15-Jul",bctl:"5:25",sunrise:"5:50",sunset:"19:24",ectl:"19:50"},
+{date:"16-Jul",bctl:"5:26",sunrise:"5:51",sunset:"19:24",ectl:"19:49"},
+{date:"17-Jul",bctl:"5:26",sunrise:"5:51",sunset:"19:24",ectl:"19:49"},
+{date:"18-Jul",bctl:"5:27",sunrise:"5:52",sunset:"19:24",ectl:"19:49"},
+{date:"19-Jul",bctl:"5:27",sunrise:"5:52",sunset:"19:23",ectl:"19:48"},
+{date:"20-Jul",bctl:"5:28",sunrise:"5:53",sunset:"19:23",ectl:"19:48"},
+{date:"21-Jul",bctl:"5:28",sunrise:"5:53",sunset:"19:23",ectl:"19:48"},
+{date:"22-Jul",bctl:"5:29",sunrise:"5:54",sunset:"19:22",ectl:"19:47"},
+{date:"23-Jul",bctl:"5:29",sunrise:"5:54",sunset:"19:22",ectl:"19:47"},
+{date:"24-Jul",bctl:"5:30",sunrise:"5:55",sunset:"19:21",ectl:"19:46"},
+{date:"25-Jul",bctl:"5:30",sunrise:"5:55",sunset:"19:21",ectl:"19:46"},
+{date:"26-Jul",bctl:"5:31",sunrise:"5:56",sunset:"19:21",ectl:"19:45"},
+{date:"27-Jul",bctl:"5:31",sunrise:"5:56",sunset:"19:20",ectl:"19:45"},
+{date:"28-Jul",bctl:"5:32",sunrise:"5:57",sunset:"19:20",ectl:"19:44"},
+{date:"29-Jul",bctl:"5:32",sunrise:"5:57",sunset:"19:19",ectl:"19:44"},
+{date:"30-Jul",bctl:"5:33",sunrise:"5:57",sunset:"19:18",ectl:"19:43"},
+{date:"31-Jul",bctl:"5:33",sunrise:"5:58",sunset:"19:18",ectl:"19:42"},
+{date:"01-Aug",bctl:"5:34",sunrise:"5:58",sunset:"19:17",ectl:"19:42"},
+{date:"02-Aug",bctl:"5:34",sunrise:"5:59",sunset:"19:17",ectl:"19:41"},
+{date:"03-Aug",bctl:"5:35",sunrise:"5:59",sunset:"19:16",ectl:"19:41"},
+{date:"04-Aug",bctl:"5:35",sunrise:"6:00",sunset:"19:15",ectl:"19:40"},
+{date:"05-Aug",bctl:"5:36",sunrise:"6:00",sunset:"19:15",ectl:"19:39"},
+{date:"06-Aug",bctl:"5:36",sunrise:"6:01",sunset:"19:14",ectl:"19:38"},
+{date:"07-Aug",bctl:"5:37",sunrise:"6:01",sunset:"19:13",ectl:"19:38"},
+{date:"08-Aug",bctl:"5:37",sunrise:"6:02",sunset:"19:13",ectl:"19:37"},
+{date:"09-Aug",bctl:"5:38",sunrise:"6:02",sunset:"19:12",ectl:"19:36"},
+{date:"10-Aug",bctl:"5:38",sunrise:"6:03",sunset:"19:11",ectl:"19:35"},
+{date:"11-Aug",bctl:"5:39",sunrise:"6:03",sunset:"19:11",ectl:"19:35"},
+{date:"12-Aug",bctl:"5:39",sunrise:"6:03",sunset:"19:10",ectl:"19:34"},
+{date:"13-Aug",bctl:"5:40",sunrise:"6:04",sunset:"19:09",ectl:"19:33"},
+{date:"14-Aug",bctl:"5:40",sunrise:"6:04",sunset:"19:08",ectl:"19:32"},
+{date:"15-Aug",bctl:"5:41",sunrise:"6:05",sunset:"19:07",ectl:"19:31"},
+{date:"16-Aug",bctl:"5:41",sunrise:"6:05",sunset:"19:07",ectl:"19:30"},
+{date:"17-Aug",bctl:"5:42",sunrise:"6:06",sunset:"19:06",ectl:"19:29"},
+{date:"18-Aug",bctl:"5:42",sunrise:"6:06",sunset:"19:05",ectl:"19:29"},
+{date:"19-Aug",bctl:"5:43",sunrise:"6:06",sunset:"19:04",ectl:"19:28"},
+{date:"20-Aug",bctl:"5:43",sunrise:"6:07",sunset:"19:03",ectl:"19:27"},
+{date:"21-Aug",bctl:"5:44",sunrise:"6:07",sunset:"19:02",ectl:"19:26"},
+{date:"22-Aug",bctl:"5:44",sunrise:"6:08",sunset:"19:01",ectl:"19:25"},
+{date:"23-Aug",bctl:"5:45",sunrise:"6:08",sunset:"19:00",ectl:"19:24"},
+{date:"24-Aug",bctl:"5:45",sunrise:"6:08",sunset:"18:59",ectl:"19:23"},
+{date:"25-Aug",bctl:"5:45",sunrise:"6:09",sunset:"18:59",ectl:"19:22"},
+{date:"26-Aug",bctl:"5:46",sunrise:"6:09",sunset:"18:58",ectl:"19:21"},
+{date:"27-Aug",bctl:"5:46",sunrise:"6:10",sunset:"18:57",ectl:"19:20"},
+{date:"28-Aug",bctl:"5:47",sunrise:"6:10",sunset:"18:56",ectl:"19:19"},
+{date:"29-Aug",bctl:"5:47",sunrise:"6:10",sunset:"18:55",ectl:"19:18"},
+{date:"30-Aug",bctl:"5:48",sunrise:"6:11",sunset:"18:54",ectl:"19:17"},
+{date:"31-Aug",bctl:"5:48",sunrise:"6:11",sunset:"18:53",ectl:"19:16"},
+{date:"01-Sep",bctl:"5:48",sunrise:"6:12",sunset:"18:52",ectl:"19:15"},
+{date:"02-Sep",bctl:"5:49",sunrise:"6:12",sunset:"18:51",ectl:"19:14"},
+{date:"03-Sep",bctl:"5:49",sunrise:"6:12",sunset:"18:50",ectl:"19:13"},
+{date:"04-Sep",bctl:"5:50",sunrise:"6:13",sunset:"18:49",ectl:"19:12"},
+{date:"05-Sep",bctl:"5:50",sunrise:"6:13",sunset:"18:48",ectl:"19:11"},
+{date:"06-Sep",bctl:"5:50",sunrise:"6:13",sunset:"18:47",ectl:"19:10"},
+{date:"07-Sep",bctl:"5:51",sunrise:"6:14",sunset:"18:46",ectl:"19:09"},
+{date:"08-Sep",bctl:"5:51",sunrise:"6:14",sunset:"18:44",ectl:"19:07"},
+{date:"09-Sep",bctl:"5:52",sunrise:"6:15",sunset:"18:43",ectl:"19:06"},
+{date:"10-Sep",bctl:"5:52",sunrise:"6:15",sunset:"18:42",ectl:"19:05"},
+{date:"11-Sep",bctl:"5:52",sunrise:"6:15",sunset:"18:41",ectl:"19:04"},
+{date:"12-Sep",bctl:"5:53",sunrise:"6:16",sunset:"18:40",ectl:"19:03"},
+{date:"13-Sep",bctl:"5:53",sunrise:"6:16",sunset:"18:39",ectl:"19:02"},
+{date:"14-Sep",bctl:"5:53",sunrise:"6:16",sunset:"18:38",ectl:"19:01"},
+{date:"15-Sep",bctl:"5:54",sunrise:"6:17",sunset:"18:37",ectl:"19:00"},
+{date:"16-Sep",bctl:"5:54",sunrise:"6:17",sunset:"18:36",ectl:"18:59"},
+{date:"17-Sep",bctl:"5:55",sunrise:"6:17",sunset:"18:35",ectl:"18:58"},
+{date:"18-Sep",bctl:"5:55",sunrise:"6:18",sunset:"18:34",ectl:"18:57"},
+{date:"19-Sep",bctl:"5:55",sunrise:"6:18",sunset:"18:33",ectl:"18:56"},
+{date:"20-Sep",bctl:"5:56",sunrise:"6:19",sunset:"18:32",ectl:"18:54"},
+{date:"21-Sep",bctl:"5:56",sunrise:"6:19",sunset:"18:31",ectl:"18:53"},
+{date:"22-Sep",bctl:"5:56",sunrise:"6:19",sunset:"18:30",ectl:"18:52"},
+{date:"23-Sep",bctl:"5:57",sunrise:"6:20",sunset:"18:28",ectl:"18:51"},
+{date:"24-Sep",bctl:"5:57",sunrise:"6:20",sunset:"18:27",ectl:"18:50"},
+{date:"25-Sep",bctl:"5:58",sunrise:"6:20",sunset:"18:26",ectl:"18:49"},
+{date:"26-Sep",bctl:"5:58",sunrise:"6:21",sunset:"18:25",ectl:"18:48"},
+{date:"27-Sep",bctl:"5:58",sunrise:"6:21",sunset:"18:24",ectl:"18:47"},
+{date:"28-Sep",bctl:"5:59",sunrise:"6:22",sunset:"18:23",ectl:"18:46"},
+{date:"29-Sep",bctl:"5:59",sunrise:"6:22",sunset:"18:22",ectl:"18:45"},
+{date:"30-Sep",bctl:"5:59",sunrise:"6:22",sunset:"18:21",ectl:"18:44"},
+{date:"01-Oct",bctl:"6:00",sunrise:"6:23",sunset:"18:20",ectl:"18:43"},
+{date:"02-Oct",bctl:"6:00",sunrise:"6:23",sunset:"18:19",ectl:"18:42"},
+{date:"03-Oct",bctl:"6:01",sunrise:"6:23",sunset:"18:18",ectl:"18:41"},
+{date:"04-Oct",bctl:"6:01",sunrise:"6:24",sunset:"18:17",ectl:"18:40"},
+{date:"05-Oct",bctl:"6:01",sunrise:"6:24",sunset:"18:16",ectl:"18:39"},
+{date:"06-Oct",bctl:"6:02",sunrise:"6:25",sunset:"18:15",ectl:"18:38"},
+{date:"07-Oct",bctl:"6:02",sunrise:"6:25",sunset:"18:14",ectl:"18:37"},
+{date:"08-Oct",bctl:"6:03",sunrise:"6:26",sunset:"18:13",ectl:"18:36"},
+{date:"09-Oct",bctl:"6:03",sunrise:"6:26",sunset:"18:12",ectl:"18:35"},
+{date:"10-Oct",bctl:"6:04",sunrise:"6:26",sunset:"18:11",ectl:"18:34"},
+{date:"11-Oct",bctl:"6:04",sunrise:"6:27",sunset:"18:10",ectl:"18:33"},
+{date:"12-Oct",bctl:"6:04",sunrise:"6:27",sunset:"18:09",ectl:"18:32"},
+{date:"13-Oct",bctl:"6:05",sunrise:"6:28",sunset:"18:08",ectl:"18:31"},
+{date:"14-Oct",bctl:"6:05",sunrise:"6:28",sunset:"18:07",ectl:"18:30"},
+{date:"15-Oct",bctl:"6:06",sunrise:"6:29",sunset:"18:06",ectl:"18:29"},
+{date:"16-Oct",bctl:"6:06",sunrise:"6:29",sunset:"18:05",ectl:"18:28"},
+{date:"17-Oct",bctl:"6:07",sunrise:"6:30",sunset:"18:04",ectl:"18:27"},
+{date:"18-Oct",bctl:"6:07",sunrise:"6:30",sunset:"18:03",ectl:"18:26"},
+{date:"19-Oct",bctl:"6:08",sunrise:"6:31",sunset:"18:03",ectl:"18:26"},
+{date:"20-Oct",bctl:"6:08",sunrise:"6:31",sunset:"18:02",ectl:"18:25"},
+{date:"21-Oct",bctl:"6:09",sunrise:"6:32",sunset:"18:01",ectl:"18:24"},
+{date:"22-Oct",bctl:"6:09",sunrise:"6:32",sunset:"18:00",ectl:"18:23"},
+{date:"23-Oct",bctl:"6:10",sunrise:"6:33",sunset:"17:59",ectl:"18:22"},
+{date:"24-Oct",bctl:"6:10",sunrise:"6:33",sunset:"17:58",ectl:"18:22"},
+{date:"25-Oct",bctl:"6:11",sunrise:"6:34",sunset:"17:58",ectl:"18:21"},
+{date:"26-Oct",bctl:"6:11",sunrise:"6:34",sunset:"17:57",ectl:"18:20"},
+{date:"27-Oct",bctl:"6:12",sunrise:"6:35",sunset:"17:56",ectl:"18:19"},
+{date:"28-Oct",bctl:"6:12",sunrise:"6:35",sunset:"17:55",ectl:"18:19"},
+{date:"29-Oct",bctl:"6:13",sunrise:"6:36",sunset:"17:55",ectl:"18:18"},
+{date:"30-Oct",bctl:"6:13",sunrise:"6:37",sunset:"17:54",ectl:"18:17"},
+{date:"31-Oct",bctl:"6:14",sunrise:"6:37",sunset:"17:53",ectl:"18:17"},
+{date:"01-Nov",bctl:"6:14",sunrise:"6:38",sunset:"17:53",ectl:"18:16"},
+{date:"02-Nov",bctl:"6:15",sunrise:"6:38",sunset:"17:52",ectl:"18:15"},
+{date:"03-Nov",bctl:"6:15",sunrise:"6:39",sunset:"17:51",ectl:"18:15"},
+{date:"04-Nov",bctl:"6:16",sunrise:"6:40",sunset:"17:51",ectl:"18:14"},
+{date:"05-Nov",bctl:"6:17",sunrise:"6:40",sunset:"17:50",ectl:"18:14"},
+{date:"06-Nov",bctl:"6:17",sunrise:"6:41",sunset:"17:49",ectl:"18:13"},
+{date:"07-Nov",bctl:"6:18",sunrise:"6:42",sunset:"17:49",ectl:"18:13"},
+{date:"08-Nov",bctl:"6:18",sunrise:"6:42",sunset:"17:48",ectl:"18:12"},
+{date:"09-Nov",bctl:"6:19",sunrise:"6:43",sunset:"17:48",ectl:"18:12"},
+{date:"10-Nov",bctl:"6:20",sunrise:"6:43",sunset:"17:47",ectl:"18:11"},
+{date:"11-Nov",bctl:"6:20",sunrise:"6:44",sunset:"17:47",ectl:"18:11"},
+{date:"12-Nov",bctl:"6:21",sunrise:"6:45",sunset:"17:47",ectl:"18:10"},
+{date:"13-Nov",bctl:"6:22",sunrise:"6:45",sunset:"17:46",ectl:"18:10"},
+{date:"14-Nov",bctl:"6:22",sunrise:"6:46",sunset:"17:46",ectl:"18:10"},
+{date:"15-Nov",bctl:"6:23",sunrise:"6:47",sunset:"17:45",ectl:"18:09"},
+{date:"16-Nov",bctl:"6:23",sunrise:"6:48",sunset:"17:45",ectl:"18:09"},
+{date:"17-Nov",bctl:"6:24",sunrise:"6:48",sunset:"17:45",ectl:"18:09"},
+{date:"18-Nov",bctl:"6:25",sunrise:"6:49",sunset:"17:44",ectl:"18:09"},
+{date:"19-Nov",bctl:"6:25",sunrise:"6:50",sunset:"17:44",ectl:"18:08"},
+{date:"20-Nov",bctl:"6:26",sunrise:"6:50",sunset:"17:44",ectl:"18:08"},
+{date:"21-Nov",bctl:"6:27",sunrise:"6:51",sunset:"17:44",ectl:"18:08"},
+{date:"22-Nov",bctl:"6:27",sunrise:"6:52",sunset:"17:43",ectl:"18:08"},
+{date:"23-Nov",bctl:"6:28",sunrise:"6:52",sunset:"17:43",ectl:"18:08"},
+{date:"24-Nov",bctl:"6:29",sunrise:"6:53",sunset:"17:43",ectl:"18:08"},
+{date:"25-Nov",bctl:"6:29",sunrise:"6:54",sunset:"17:43",ectl:"18:07"},
+{date:"26-Nov",bctl:"6:30",sunrise:"6:55",sunset:"17:43",ectl:"18:07"},
+{date:"27-Nov",bctl:"6:31",sunrise:"6:55",sunset:"17:43",ectl:"18:07"},
+{date:"28-Nov",bctl:"6:32",sunrise:"6:56",sunset:"17:43",ectl:"18:07"},
+{date:"29-Nov",bctl:"6:32",sunrise:"6:57",sunset:"17:43",ectl:"18:07"},
+{date:"30-Nov",bctl:"6:33",sunrise:"6:58",sunset:"17:43",ectl:"18:07"},
+{date:"01-Dec",bctl:"6:34",sunrise:"6:58",sunset:"17:43",ectl:"18:07"},
+{date:"02-Dec",bctl:"6:34",sunrise:"6:59",sunset:"17:43",ectl:"18:07"},
+{date:"03-Dec",bctl:"6:35",sunrise:"7:00",sunset:"17:43",ectl:"18:08"},
+{date:"04-Dec",bctl:"6:36",sunrise:"7:00",sunset:"17:43",ectl:"18:08"},
+{date:"05-Dec",bctl:"6:36",sunrise:"7:01",sunset:"17:43",ectl:"18:08"},
+{date:"06-Dec",bctl:"6:37",sunrise:"7:02",sunset:"17:43",ectl:"18:08"},
+{date:"07-Dec",bctl:"6:38",sunrise:"7:02",sunset:"17:43",ectl:"18:08"},
+{date:"08-Dec",bctl:"6:38",sunrise:"7:03",sunset:"17:44",ectl:"18:08"},
+{date:"09-Dec",bctl:"6:39",sunrise:"7:04",sunset:"17:44",ectl:"18:09"},
+{date:"10-Dec",bctl:"6:40",sunrise:"7:04",sunset:"17:44",ectl:"18:09"},
+{date:"11-Dec",bctl:"6:40",sunrise:"7:05",sunset:"17:44",ectl:"18:09"},
+{date:"12-Dec",bctl:"6:41",sunrise:"7:06",sunset:"17:45",ectl:"18:10"},
+{date:"13-Dec",bctl:"6:41",sunrise:"7:06",sunset:"17:45",ectl:"18:10"},
+{date:"14-Dec",bctl:"6:42",sunrise:"7:07",sunset:"17:45",ectl:"18:10"},
+{date:"15-Dec",bctl:"6:43",sunrise:"7:08",sunset:"17:46",ectl:"18:11"},
+{date:"16-Dec",bctl:"6:43",sunrise:"7:08",sunset:"17:46",ectl:"18:11"},
+{date:"17-Dec",bctl:"6:44",sunrise:"7:09",sunset:"17:46",ectl:"18:11"},
+{date:"18-Dec",bctl:"6:44",sunrise:"7:09",sunset:"17:47",ectl:"18:12"},
+{date:"19-Dec",bctl:"6:45",sunrise:"7:10",sunset:"17:47",ectl:"18:12"},
+{date:"20-Dec",bctl:"6:45",sunrise:"7:10",sunset:"17:48",ectl:"18:13"},
+{date:"21-Dec",bctl:"6:46",sunrise:"7:11",sunset:"17:48",ectl:"18:13"},
+{date:"22-Dec",bctl:"6:46",sunrise:"7:11",sunset:"17:49",ectl:"18:14"},
+{date:"23-Dec",bctl:"6:47",sunrise:"7:12",sunset:"17:49",ectl:"18:14"},
+{date:"24-Dec",bctl:"6:47",sunrise:"7:12",sunset:"17:50",ectl:"18:15"},
+{date:"25-Dec",bctl:"6:48",sunrise:"7:13",sunset:"17:50",ectl:"18:15"},
+{date:"26-Dec",bctl:"6:48",sunrise:"7:13",sunset:"17:51",ectl:"18:16"},
+{date:"27-Dec",bctl:"6:49",sunrise:"7:14",sunset:"17:51",ectl:"18:16"},
+{date:"28-Dec",bctl:"6:49",sunrise:"7:14",sunset:"17:52",ectl:"18:17"},
+{date:"29-Dec",bctl:"6:50",sunrise:"7:14",sunset:"17:53",ectl:"18:18"},
+{date:"30-Dec",bctl:"6:50",sunrise:"7:15",sunset:"17:53",ectl:"18:18"},
+{date:"31-Dec",bctl:"6:50",sunrise:"7:15",sunset:"17:54",ectl:"18:19"}
+];
+
+
+let showFull = false;
+
+// 🔹 Find today's index
+function findTodayIndex() {
+  let today = new Date();
+
+  let index = timeData.findIndex(d => {
+    let parts = d.date.split('-'); // 21-Apr
+    let day = parseInt(parts[0]);
+    let monthStr = parts[1];
+
+    let monthMap = {
+      Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
+      Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11
+    };
+
+    return (
+      day === today.getDate() &&
+      monthMap[monthStr] === today.getMonth()
+    );
+  });
+
+  return index >= 0 ? index : 0;
+}
+
+let startIndex = findTodayIndex();
+
+// 🔹 Render table
+function renderTable() {
+  const tbody = document.getElementById("dataBody");
+  tbody.innerHTML = "";
+
+  let today = new Date();
+
+  for (let i = 0; i < 3; i++) {
+    let index = startIndex + i;
+    let t = timeData[index] || {};
+
+    let isToday = false;
+
+    if (t.date) {
+      let parts = t.date.split('-');
+      let day = parseInt(parts[0]);
+      let monthStr = parts[1];
+
+      let monthMap = {
+        Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
+        Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11
+      };
+
+      isToday = (
+        day === today.getDate() &&
+        monthMap[monthStr] === today.getMonth()
+      );
+    }
+
+    let row = `<tr class="${isToday ? 'today' : ''}">
+      <td>${t.date || '-'}</td>
+      <td class="bctl ${showFull ? '' : 'hidden'}">${t.bctl || '-'}</td>
+      <td>${t.sunrise || '-'}</td>
+      <td>${t.sunset || '-'}</td>
+      <td class="ectl ${showFull ? '' : 'hidden'}">${t.ectl || '-'}</td>
+    </tr>`;
+
+    tbody.innerHTML += row;
+  }
+
+  document.querySelectorAll(".bctl, .ectl").forEach(el => {
+    el.classList.toggle("hidden", !showFull);
+  });
+
+  document.querySelector(".toggle-btn").innerText =
+    showFull ? "Show Less" : "Show Full Details";
+}
+
+// 🔹 Navigation
+function nextDays() {
+  if (startIndex < timeData.length - 3) {
+    startIndex++;
+    renderTable();
+  }
+}
+
+function prevDays() {
+  if (startIndex > 0) {
+    startIndex--;
+    renderTable();
+  }
+}
+
+// 🔹 Toggle
+function toggleView() {
+  showFull = !showFull;
+  renderTable();
+}
+
+// 🔹 Initial load
+renderTable();
+
+</script>
+
+</body>
+</html>
