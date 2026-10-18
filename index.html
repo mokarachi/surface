@@ -168,6 +168,9 @@ button:active{
 
 <script>
 (function(){
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9lkPl0lOeNS4dwhwK87QjScjF5FKkOP8aVAXVjYeKkQE0TI8QcQrjQRXCMlreIuTn/exec";
+
+
 
 const REQUIRED_STATIONS = new Set([
 "41572","41571","41600","41640","41620","41624","41675","41678","41697",
@@ -260,12 +263,33 @@ function processData(){
   stationCount.textContent="Stations Produced: "+collected.length;
   output.textContent=processedText;
 }
+async function saveSurfaceData(original, processed) {
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        originalData: original,
+        processedData: processed
+      })
+    });
 
+    const result = await response.json();
+	
+	if (!result.success) {
+		alert("Google Sheets error: " + result.message);
+	}
+    }
+  } catch (error) {
+    alert("Could not save to Google Sheets: " + error.message);
+  }
+}
 // ✅ Auto‑copy tied directly to button click
 submitBtn.onclick = () => {
   processData();
-  if(processedText){
+
+  if (processedText) {
     navigator.clipboard.writeText(processedText);
+    saveSurfaceData(dataInput.value.trim(), processedText);
   }
 };
 
